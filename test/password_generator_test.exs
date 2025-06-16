@@ -1,6 +1,5 @@
 defmodule PasswordGeneratorTest do
   use ExUnit.Case
-  doctest PasswordGenerator
 
   setup do
     options = %{
@@ -11,9 +10,9 @@ defmodule PasswordGeneratorTest do
     }
 
     options_type = %{
-      lowercase: Enum.map(?a..?z, & <<?1>>),
+      lowercase: Enum.map(?a..?z, & <<&1>>),
       numbers: Enum.map(0..9, & Integer.to_string(&1)),
-      uppercase: Enum.map(?A..?Z, & <<?1>>),
+      uppercase: Enum.map(?A..?Z, & <<&1>>),
       symbols: String.split("!@#$%^&*()_-+=[{}]|~;:?.><,", "", trim: true)
     }
 
@@ -81,5 +80,116 @@ defmodule PasswordGeneratorTest do
     options = %{"length" => "5", "numbers" => "true", "invalid" => "true"}
 
     assert {:error, _error} = PasswordGenerator.generate(options)
+  end
+
+  test "returns string uppercase", %{options_type: options} do
+    options_with_uppercase = %{
+      "length" => "10",
+      "numbers" => "false",
+      "uppercase" => "true",
+      "symbols" => "false"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_with_uppercase)
+
+    assert String.contains?(result, options.uppercase)
+
+    refute String.contains?(result, options.numbers)
+    refute String.contains?(result, options.symbols)
+  end
+
+  test "returns string just with numbers", %{options_type: options} do
+    options_with_numbers = %{
+      "length" => "10",
+      "numbers" => "true",
+      "uppercase" => "false",
+      "symbols" => "false"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_with_numbers)
+
+    assert String.contains?(result, options.numbers)
+
+    refute String.contains?(result, options.uppercase)
+    refute String.contains?(result, options.symbols)
+  end
+
+  test "returns string with uppercase and numbers", %{options_type: options} do
+    options_included = %{
+      "length" => "10",
+      "numbers" => "true",
+      "uppercase" => "true",
+      "symbols" => "false"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_included)
+
+    assert String.contains?(result, options.numbers)
+    assert String.contains?(result, options.uppercase)
+
+    refute String.contains?(result, options.symbols)
+  end
+
+  test "returns string with symbols", %{options_type: options} do
+    options_symbols = %{
+      "length" => "10",
+      "numbers" => "false",
+      "uppercase" => "false",
+      "symbols" => "true"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_symbols)
+
+    assert String.contains?(result, options.symbols)
+
+    refute String.contains?(result, options.numbers)
+    refute String.contains?(result, options.uppercase)
+  end
+
+  test "returns string with all included options", %{options_type: options} do
+    options_all = %{
+      "length" => "10",
+      "numbers" => "true",
+      "uppercase" => "true",
+      "symbols" => "true"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_all)
+
+    assert String.contains?(result, options.symbols)
+    assert String.contains?(result, options.numbers)
+    assert String.contains?(result, options.uppercase)
+  end
+
+  test "returns string with uppercase and symbols", %{options_type: options} do
+    options_included = %{
+      "length" => "10",
+      "numbers" => "false",
+      "uppercase" => "true",
+      "symbols" => "true"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_included)
+
+    assert String.contains?(result, options.symbols)
+    assert String.contains?(result, options.uppercase)
+
+    refute String.contains?(result, options.numbers)
+  end
+
+  test "returns string with numbers and symbols", %{options_type: options} do
+    options_included = %{
+      "length" => "10",
+      "numbers" => "true",
+      "uppercase" => "false",
+      "symbols" => "true"
+    }
+
+    {:ok, result} = PasswordGenerator.generate(options_included)
+
+    assert String.contains?(result, options.symbols)
+    assert String.contains?(result, options.numbers)
+
+    refute String.contains?(result, options.uppercase)
   end
 end

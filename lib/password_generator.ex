@@ -68,7 +68,7 @@ defmodule PasswordGenerator do
     options_values = Map.values(options_without_length)
     value =
       options_values
-      |> Enum.all?(fn x -> String.to_atom(x) end |> is_boolean())
+      |> Enum.all?(fn x -> String.to_atom(x) |> is_boolean() end)
 
     validate_options_values_are_boolean(value, length, options_without_length)
   end
@@ -114,6 +114,23 @@ defmodule PasswordGenerator do
 
   defp get(:lowercase_letter) do
     <<Enum.random(?a..?z)>>
+  end
+
+  defp get(:uppercase) do
+    <<Enum.random(?A..?Z)>>
+  end
+
+  defp get(:numbers) do
+    Enum.random(0..9)
+    |> Integer.to_string()
+  end
+
+  @symbols "!@#$%^&*()_-+=[{}]|~;:?.><,"
+  defp get(:symbols) do
+    symbols =
+      @symbols
+      |> String.split("", trim: true)
+    Enum.random(symbols)
   end
 
   defp generate_random_strings(length, options) do
